@@ -5802,26 +5802,6 @@ public interface IPostgreSQLParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitConstcharacter([NotNull] PostgreSQLParser.ConstcharacterContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="PostgreSQLParser.characterWithLength"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterCharacterWithLength([NotNull] PostgreSQLParser.CharacterWithLengthContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="PostgreSQLParser.characterWithLength"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitCharacterWithLength([NotNull] PostgreSQLParser.CharacterWithLengthContext context);
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="PostgreSQLParser.characterWithoutLength"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterCharacterWithoutLength([NotNull] PostgreSQLParser.CharacterWithoutLengthContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="PostgreSQLParser.characterWithoutLength"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitCharacterWithoutLength([NotNull] PostgreSQLParser.CharacterWithoutLengthContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="PostgreSQLParser.character_c"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

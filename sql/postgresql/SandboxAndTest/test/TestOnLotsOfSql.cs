@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 namespace codeanalyze.test
 {
-    internal class CommonParserTests
+    internal class TestOnLotsOfSql
     {
 
         bool FoundUparsed = false;

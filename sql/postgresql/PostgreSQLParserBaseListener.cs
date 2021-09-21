@@ -6957,30 +6957,6 @@ public partial class PostgreSQLParserBaseListener : IPostgreSQLParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitConstcharacter([NotNull] PostgreSQLParser.ConstcharacterContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="PostgreSQLParser.characterWithLength"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterCharacterWithLength([NotNull] PostgreSQLParser.CharacterWithLengthContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="PostgreSQLParser.characterWithLength"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitCharacterWithLength([NotNull] PostgreSQLParser.CharacterWithLengthContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="PostgreSQLParser.characterWithoutLength"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterCharacterWithoutLength([NotNull] PostgreSQLParser.CharacterWithoutLengthContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="PostgreSQLParser.characterWithoutLength"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitCharacterWithoutLength([NotNull] PostgreSQLParser.CharacterWithoutLengthContext context) { }
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="PostgreSQLParser.character_c"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

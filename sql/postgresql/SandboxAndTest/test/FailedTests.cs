@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace codeanalyze.test
 {
-    internal class ParserTestsFailed
+    internal class FailedTests
     {
         bool FoundUparsed = false;
 
