@@ -30,6 +30,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\PostgreSQLLexer.cs" Link="PostgreSQLLexer.cs" />
+    <Compile Include="..\..\PostgreSQLParser.cs" Link="PostgreSQLParser.cs" />
+    <Compile Include="..\..\PostgreSQLParserBaseListener.cs" Link="PostgreSQLParserBaseListener.cs" />
+    <Compile Include="..\..\PostgreSQLParserListener.cs" Link="PostgreSQLParserListener.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Scripts\cgunp.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

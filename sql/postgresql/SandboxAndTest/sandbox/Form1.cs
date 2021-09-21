@@ -9,10 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using codeanalyze.core;
-using codeanalyze.core.Common;
-using QUT.Gplex.Lexer;
-
 
 namespace pgcodeanalyze.sandbox
 {
@@ -37,38 +33,38 @@ namespace pgcodeanalyze.sandbox
 
         private void DoParse(string sql)
         {
-            UnparsedFound = false;
-            edMessages.Text = "";
-            codeanalyser ph = new codeanalyser(sql,"");
-            ph.Parser.AddErrorListener(new PgcodeanalyzeErrorListener() { form = this }); ;
-            IParseTree tree = ph.GetRootNode();
-            PostgreListener listener = new PostgreListener();
-            listener.Init();
-            ParseTreeWalker.Default.Walk(listener, tree);
-            listener.wr.Flush();
+            //UnparsedFound = false;
+            //edMessages.Text = "";
+            //codeanalyser ph = new codeanalyser(sql,"");
+            //ph.Parser.AddErrorListener(new PgcodeanalyzeErrorListener() { form = this }); ;
+            //IParseTree tree = ph.GetRootNode();
+            //PostgreListener listener = new PostgreListener();
+            //listener.Init();
+            //ParseTreeWalker.Default.Walk(listener, tree);
+            //listener.wr.Flush();
 
-            edResult.Text = listener.sb.ToString();
+            //edResult.Text = listener.sb.ToString();
 
-            tc.SelectedTab = tabPage2;
-            Text = UnparsedFound ? "Found Unparsed" : "OK";
+            //tc.SelectedTab = tabPage2;
+            //Text = UnparsedFound ? "Found Unparsed" : "OK";
 
         }
         private void DoParsePlSql(string sql)
         {
-            UnparsedFound = false;
-            edMessages.Text = "";
-            codeanalyser ph = new codeanalyser(sql,"");
-            ph.Parser.AddErrorListener(new PgcodeanalyzeErrorListener() { form = this }); ;
-            IParseTree tree = ph.GetPlSqlRootNode();
-            PostgreListener listener = new PostgreListener();
-            listener.Init();
-            ParseTreeWalker.Default.Walk(listener, tree);
-            listener.wr.Flush();
+            //UnparsedFound = false;
+            //edMessages.Text = "";
+            //codeanalyser ph = new codeanalyser(sql,"");
+            //ph.Parser.AddErrorListener(new PgcodeanalyzeErrorListener() { form = this }); ;
+            //IParseTree tree = ph.GetPlSqlRootNode();
+            //PostgreListener listener = new PostgreListener();
+            //listener.Init();
+            //ParseTreeWalker.Default.Walk(listener, tree);
+            //listener.wr.Flush();
 
-            edResult.Text = listener.sb.ToString();
+            //edResult.Text = listener.sb.ToString();
 
-            SelectResultTab();
-            Text = UnparsedFound ? "Found Unparsed" : "OK";
+            //SelectResultTab();
+            //Text = UnparsedFound ? "Found Unparsed" : "OK";
 
         }
 
@@ -102,31 +98,31 @@ namespace pgcodeanalyze.sandbox
 
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
-            //https://stackoverflow.com/questions/51001389/starting-point-for-antlr4-performance
-            Stopwatch sw = new Stopwatch();
-            string text = edSource.Text;
+            ////https://stackoverflow.com/questions/51001389/starting-point-for-antlr4-performance
+            //Stopwatch sw = new Stopwatch();
+            //string text = edSource.Text;
 
-            sw.Start();
-            codeanalyser ph = new codeanalyser(text,"");
-            ph.Parser.Profile = true;
-            sw.Stop();
-            Console.WriteLine($"new ph {sw.Elapsed}");
-            sw.Start();
-            ph.Parser.AddErrorListener(new AnalyzerErrorListener());
-            IParseTree tree = ph.GetRootNode();
-            sw.Stop();
-            var decisions = ph.Parser.ParseInfo.getDecisionInfo().Where(r => r.timeInPrediction > 1000)
-                .Select(r => r).OrderByDescending(r => r.timeInPrediction);
+            //sw.Start();
+            //codeanalyser ph = new codeanalyser(text,"");
+            //ph.Parser.Profile = true;
+            //sw.Stop();
+            //Console.WriteLine($"new ph {sw.Elapsed}");
+            //sw.Start();
+            //ph.Parser.AddErrorListener(new AnalyzerErrorListener());
+            //IParseTree tree = ph.GetRootNode();
+            //sw.Stop();
+            //var decisions = ph.Parser.ParseInfo.getDecisionInfo().Where(r => r.timeInPrediction > 1000)
+            //    .Select(r => r).OrderByDescending(r => r.timeInPrediction);
 
-            //Console.WriteLine($"walked {sw.Elapsed}");
-            var result = "";
-            foreach (var d in decisions)
-            {
-                //Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex]))
-                var rule = ph.Parser.RuleNames[ph.Parser.Atn.GetDecisionState(d.decision).ruleIndex];
-                result += $"{rule} : {d.timeInPrediction}\r\n";
-            }
-            edResult.Text = result;
+            ////Console.WriteLine($"walked {sw.Elapsed}");
+            //var result = "";
+            //foreach (var d in decisions)
+            //{
+            //    //Proparse.ruleNames[Proparse._ATN.getDecisionState(decision.decision).ruleIndex]))
+            //    var rule = ph.Parser.RuleNames[ph.Parser.Atn.GetDecisionState(d.decision).ruleIndex];
+            //    result += $"{rule} : {d.timeInPrediction}\r\n";
+            //}
+            //edResult.Text = result;
 
         }
 
@@ -202,17 +198,17 @@ namespace pgcodeanalyze.sandbox
 
         private void toolStripButton6_Click(object sender, EventArgs e)
         {
-            var lex = new Scanner();
-            lex.SetSource(edSource.Text,0);
-            int nextToken;
-            var sb = new StringBuilder(1024);
-            while((nextToken=lex.yylex())!=(int)Tokens.EOF)
-            {
-                sb.AppendLine($"{lex.yytext}:{nextToken}");
-            }
+            //var lex = new Scanner();
+            //lex.SetSource(edSource.Text,0);
+            //int nextToken;
+            //var sb = new StringBuilder(1024);
+            //while((nextToken=lex.yylex())!=(int)Tokens.EOF)
+            //{
+            //    sb.AppendLine($"{lex.yytext}:{nextToken}");
+            //}
 
-            edResult.Text = sb.ToString();
-            tc.SelectedIndex = 1;
+            //edResult.Text = sb.ToString();
+            //tc.SelectedIndex = 1;
         }
     }
 

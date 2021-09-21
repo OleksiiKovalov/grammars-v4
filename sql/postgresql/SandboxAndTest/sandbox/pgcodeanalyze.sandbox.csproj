@@ -52,6 +52,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\PostgreSQLLexer.cs">
+      <Link>PostgreSQLLexer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PostgreSQLParser.cs">
+      <Link>PostgreSQLParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PostgreSQLParserBaseListener.cs">
+      <Link>PostgreSQLParserBaseListener.cs</Link>
+    </Compile>
+    <Compile Include="..\..\PostgreSQLParserListener.cs">
+      <Link>PostgreSQLParserListener.cs</Link>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,16 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pgcodeanalyze.core.48\pgcodeanalyze.core.net48.csproj">
-      <Project>{1fd16458-2a53-4648-9ca6-a30dafdce113}</Project>
-      <Name>pgcodeanalyze.core.net48</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\pgcodeanalyze.parser.gppg.net48\pgcodeanalyze.parser.gppg.net48.csproj">
-      <Project>{b4ac4b29-1d77-42c4-8158-b7980bbc2f7c}</Project>
-      <Name>pgcodeanalyze.parser.gppg.net48</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
