@@ -88,6 +88,7 @@ ddl_clause
     | alter_external_resource_pool
     | alter_fulltext_catalog
     | alter_fulltext_stoplist
+    | alter_index
     | alter_login_azure_sql
     | alter_login_azure_sql_dw_and_pdw
     | alter_login_sql_server
@@ -1923,6 +1924,10 @@ create_index
     (ON id_)?
     ';'?
     ;
+    
+alter_index
+    : ALTER INDEX id_ ON table_name (DISABLE | PAUSE | ABORT)
+    ;
 
 // https://docs.microsoft.com/en-us/sql/t-sql/statements/create-columnstore-index-transact-sql?view=sql-server-ver15
 create_columnstore_index
@@ -2008,28 +2013,27 @@ create_or_alter_function
 func_body_returns_select
     : RETURNS TABLE
         (WITH function_option (',' function_option)*)?
-        AS?
-        RETURN ('(' select_statement_standalone ')' | select_statement_standalone)
+        AS? (as_external_name | RETURN ('(' select_statement_standalone ')' | select_statement_standalone))
     ;
 
 func_body_returns_table
     : RETURNS LOCAL_ID table_type_definition
         (WITH function_option (',' function_option)*)?
-        AS?
+        AS? (as_external_name | 
         BEGIN
            sql_clauses*
            RETURN ';'?
-        END ';'?
+        END ';'?)
     ;
 
 func_body_returns_scalar
     : RETURNS data_type
         (WITH function_option (',' function_option)*)?
-        AS?
+        AS? (as_external_name | 
         BEGIN
            sql_clauses*
            RETURN ret=expression ';'?
-       END
+       END)
     ;
 
 procedure_param
@@ -2094,10 +2098,10 @@ alter_table
                              | ALTER COLUMN column_definition
                              | DROP COLUMN id_ (',' id_)*
                              | DROP CONSTRAINT constraint=id_
-                             | WITH (CHECK | NOCHECK) ADD CONSTRAINT constraint=id_
-                                ( FOREIGN KEY '(' fk = column_name_list ')' REFERENCES table_name '(' pk = column_name_list')' on_delete? on_update? 
+                             | WITH (CHECK | NOCHECK) ADD (CONSTRAINT constraint=id_)?
+                                ( FOREIGN KEY '(' fk=column_name_list ')' REFERENCES table_name ('(' pk=column_name_list')')? (on_delete | on_update)*
                                 | CHECK '(' search_condition ')' )
-                             | CHECK CONSTRAINT constraint=id_
+                             | (NOCHECK | CHECK) CONSTRAINT constraint=id_
                              | (ENABLE | DISABLE) TRIGGER id_?
                              | REBUILD table_options
                              | SWITCH switch_partition)
@@ -2680,9 +2684,10 @@ execute_body_batch
     : func_proc_name_server_database_schema (execute_statement_arg (',' execute_statement_arg)*)? ';'?
     ;
 
+//https://docs.microsoft.com/it-it/sql/t-sql/language-elements/execute-transact-sql?view=sql-server-ver15
 execute_body
     : (return_status=LOCAL_ID '=')? (func_proc_name_server_database_schema | execute_var_string)  execute_statement_arg?
-    | '(' execute_var_string ('+' execute_var_string)* ')' (AS? (LOGIN | USER) '=' STRING)?
+    | '(' execute_var_string (',' execute_var_string)* ')' (AS? (LOGIN | USER) '=' STRING)? (AT_KEYWORD linkedServer=id_)?
     ;
 
 execute_statement_arg
@@ -2705,8 +2710,8 @@ execute_parameter
     ;
 
 execute_var_string
-    : LOCAL_ID
-    | STRING
+    : LOCAL_ID (OUTPUT | OUT)?
+    | STRING ('+' LOCAL_ID ('+' execute_var_string)?)?
     ;
 
 // https://msdn.microsoft.com/en-us/library/ff848791.aspx
@@ -3385,8 +3390,9 @@ select_list_elem
     : asterisk
     | column_elem
     | udt_elem
-    | LOCAL_ID (assignment_operator | '=') expression
+    | LOCAL_ID (assignment_operator | '=') ( expression | NEXT VALUE FOR table_name)
     | expression_elem
+    | NEXT VALUE FOR table_name as_column_alias?
     ;
 
 table_sources
@@ -3519,7 +3525,7 @@ bulk_option
 
 derived_table
     : subquery
-    | '(' subquery ')'
+    | '(' subquery (UNION ALL subquery)* ')' 
     | table_value_constructor
     | '(' table_value_constructor ')'
     ;
@@ -3829,9 +3835,10 @@ entity_name_for_parallel_dw
     ;
 
 full_table_name
-    : (server=id_ '.' database=id_ '.'  schema=id_   '.'
-    |                database=id_ '.' (schema=id_)? '.'
-    |                                 schema=id_   '.')? table=id_
+    : (linkedServer=id_ '.' '.' schema=id_   '.'    
+    |                       server=id_    '.' database=id_ '.'  schema=id_   '.'
+    |                                         database=id_ '.' (schema=id_)? '.'
+    |                                                           schema=id_    '.')? table=id_
     ;
 
 table_name
