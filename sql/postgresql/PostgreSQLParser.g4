@@ -2692,26 +2692,28 @@ opt_escape:
 ;
 
 a_expr:
-    a_expr_subqu
+    a_expr_qual
 ;
-
 
 /*23*/ /*moved to c_expr*/
 /*22*/ /*moved to c_expr*/
-/*21*/a_expr_subqu: a_expr_in (subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr_in CLOSE_PAREN))?;
-/*20*/a_expr_in: a_expr_qual ( NOT? IN_P in_expr)?;
 /*19*/a_expr_qual: a_expr_lessless qual_op?;
 /*18*/a_expr_lessless:a_expr_or ((LESS_LESS|GREATER_GREATER) a_expr_or)*;
 /*17*/a_expr_or:a_expr_and (OR a_expr_and)*;
-/*16*/a_expr_and:a_expr_unary_not (AND a_expr_unary_not)*;
+/*16*/a_expr_and:a_expr_in (AND a_expr_in)*;
+
+/*20*/a_expr_in: a_expr_unary_not ( NOT? IN_P in_expr)?;
+
 /*15*/ a_expr_unary_not: NOT? a_expr_isnull;
 /*14*/ /*moved to c_expr*/
 /*13*/a_expr_isnull: a_expr_is_not(ISNULL|NOTNULL)?;
 /*12*/a_expr_is_not: a_expr_compare (IS NOT?(NULL_P|TRUE_P|FALSE_P|UNKNOWN|DISTINCT FROM a_expr|OF OPEN_PAREN type_list CLOSE_PAREN|DOCUMENT_P|unicode_normal_form? NORMALIZED))?;
-/*11*/a_expr_compare: a_expr_like ( (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr_like )?;
-/*10*/a_expr_like: a_expr_unary_qualop ( NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr_unary_qualop )?;
-/* 9*/a_expr_unary_qualop: qual_op? a_expr_qual_op;
-/* 8*/a_expr_qual_op: a_expr_add (qual_op a_expr_add)*;
+/*11*/a_expr_compare: a_expr_like ( (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr_like
+        |(subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr CLOSE_PAREN)) /*21*/
+        )?;
+/*10*/a_expr_like: a_expr_qual_op ( NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr_qual_op )?;
+/* 8*/a_expr_qual_op: a_expr_unary_qualop (qual_op a_expr_unary_qualop)*;
+/* 9*/a_expr_unary_qualop: qual_op? a_expr_add;
 /* 7*/a_expr_add: a_expr_mul ( ( MINUS | PLUS  ) a_expr_mul )*;
 /* 6*/a_expr_mul: a_expr_caret ( ( STAR | SLASH | PERCENT ) a_expr_caret )*;
 /* 5*/a_expr_caret: a_expr_unary_sign ( CARET a_expr)?;
