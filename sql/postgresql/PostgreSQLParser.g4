@@ -134,6 +134,7 @@ using System.Linq;
         public IParseTree PlSqlRoot => plsqlroot();
 }
 
+
 root:
 	stmtblock EOF
 	;
@@ -2689,34 +2690,59 @@ opt_escape:
             ESCAPE a_expr
             |
 ;
+
+a_expr:
+    a_expr_subqu
+;
+
+
+/*23*/ /*moved to c_expr*/
+/*22*/ /*moved to c_expr*/
+/*21*/a_expr_subqu: a_expr_in (subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr_in CLOSE_PAREN))?;
+/*20*/a_expr_in: a_expr_qual ( NOT? IN_P in_expr)?;
+/*19*/a_expr_qual: a_expr_lessless qual_op?;
+/*18*/a_expr_lessless:a_expr_or ((LESS_LESS|GREATER_GREATER) a_expr_or)*;
+/*17*/a_expr_or:a_expr_and (OR a_expr_and)*;
+/*16*/a_expr_and:a_expr_unary_not (AND a_expr_unary_not)*;
+/*15*/ a_expr_unary_not: NOT? a_expr_isnull;
+/*14*/ /*moved to c_expr*/
+/*13*/a_expr_isnull: a_expr_is_not(ISNULL|NOTNULL)?;
+/*12*/a_expr_is_not: a_expr_compare (IS NOT?(NULL_P|TRUE_P|FALSE_P|UNKNOWN|DISTINCT FROM a_expr|OF OPEN_PAREN type_list CLOSE_PAREN|DOCUMENT_P|unicode_normal_form? NORMALIZED))?;
+/*11*/a_expr_compare: a_expr_like ( (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr_like )?;
+/*10*/a_expr_like: a_expr_unary_qualop ( NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr_unary_qualop )?;
+/* 9*/a_expr_unary_qualop: qual_op? a_expr_qual_op;
+/* 8*/a_expr_qual_op: a_expr_add (qual_op a_expr_add)*;
+/* 7*/a_expr_add: a_expr_mul ( ( MINUS | PLUS  ) a_expr_mul )*;
+/* 6*/a_expr_mul: a_expr_caret ( ( STAR | SLASH | PERCENT ) a_expr_caret )*;
+/* 5*/a_expr_caret: a_expr_unary_sign ( CARET a_expr)?;
+/* 4*/a_expr_unary_sign: ( MINUS | PLUS )? a_expr_at_time_zone/* */;
+/* 3*/a_expr_at_time_zone:a_expr_collate (AT TIME ZONE a_expr)?;
+/* 2*/a_expr_collate:a_expr_typecast (COLLATE any_name)?;
+/* 1*/a_expr_typecast:c_expr (TYPECAST typename)*;
+
+
 //precendence accroding to Table 4.2. Operator Precedence (highest to lowest)
 //https://www.postgresql.org/docs/12/sql-syntax-lexical.html#SQL-PRECEDENCE
- a_expr: c_expr
+ a_expr1: c_expr
         //::	left	PostgreSQL-style typecast
-       | a_expr TYPECAST typename
-       | a_expr COLLATE any_name
-       | a_expr AT TIME ZONE a_expr
-
+       | a_expr TYPECAST typename /* 1*/
+       | a_expr COLLATE any_name /* 2*/
+       | a_expr AT TIME ZONE a_expr/* 3*/
        //right	unary plus, unary minus
-       | (PLUS| MINUS) a_expr
-
+       | (PLUS| MINUS) a_expr/* 4*/
         //left	exponentiation
-       | a_expr CARET a_expr
-
+       | a_expr CARET a_expr/* 5*/
         //left	multiplication, division, modulo
-       | a_expr (STAR | SLASH | PERCENT) a_expr
-
+       | a_expr (STAR | SLASH | PERCENT) a_expr/* 6*/
         //left	addition, subtraction
-       | a_expr (PLUS | MINUS) a_expr
-
+       | a_expr (PLUS | MINUS) a_expr/* 7*/
         //left	all other native and user-defined operators
-       | a_expr qual_op a_expr
-       | qual_op a_expr
-
+       | a_expr qual_op a_expr/* 8*/
+       | qual_op a_expr/* 9*/
         //range containment, set membership, string matching BETWEEN IN LIKE ILIKE SIMILAR
-       | a_expr NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr opt_escape
+       | a_expr NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr opt_escape/* 10*/
         //< > = <= >= <>	 	comparison operators
-       | a_expr (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr
+       | a_expr (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr/* 11*/
        //IS ISNULL NOTNULL	 	IS TRUE, IS FALSE, IS NULL, IS DISTINCT FROM, etc
        | a_expr IS NOT?
             (
@@ -2728,28 +2754,27 @@ opt_escape:
                 |OF OPEN_PAREN type_list CLOSE_PAREN
                 |DOCUMENT_P
                 |unicode_normal_form? NORMALIZED
-            )
+            )/* 12*/
 
-       | a_expr (ISNULL|NOTNULL)
-       | row OVERLAPS row
+       | a_expr (ISNULL|NOTNULL)/* 13*/
+       | row OVERLAPS row/* 14*/
 
        //NOT	right	logical negation
-       | NOT a_expr
+       | NOT a_expr/* 15*/
 
         //AND	left	logical conjunction
-       | a_expr AND a_expr
+       | a_expr AND a_expr/* 16*/
 
         //OR	left	logical disjunction
-       | a_expr OR a_expr
+       | a_expr OR a_expr/* 17*/
 
-       | a_expr (LESS_LESS|GREATER_GREATER) a_expr
+       | a_expr (LESS_LESS|GREATER_GREATER) a_expr/* 18*/
 
-       | a_expr qual_op
-       | a_expr NOT? IN_P in_expr
-       | a_expr subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr CLOSE_PAREN)
-       | UNIQUE select_with_parens
-       | DEFAULT
-
+       | a_expr qual_op/* 19*/
+       | a_expr NOT? IN_P in_expr/* 20*/
+       | a_expr subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr CLOSE_PAREN)/* 21*/
+       | UNIQUE select_with_parens/* 22*/
+       | DEFAULT/* 23*/
 ;
 
  b_expr: c_expr
@@ -2797,6 +2822,9 @@ opt_escape:
        | explicit_row # c_expr_expr
        | implicit_row # c_expr_expr
        | GROUPING OPEN_PAREN expr_list CLOSE_PAREN # c_expr_expr
+       |/*22*/UNIQUE select_with_parens # c_expr_expr
+       | row OVERLAPS row/* 14*/# c_expr_expr
+
 ;
 plsqlvariablename:PLSQLVARIABLENAME
 ;
