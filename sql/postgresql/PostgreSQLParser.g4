@@ -2691,6 +2691,66 @@ opt_escape:
             |
 ;
 
+
+//precendence accroding to Table 4.2. Operator Precedence (highest to lowest)
+//https://www.postgresql.org/docs/12/sql-syntax-lexical.html#SQL-PRECEDENCE
+/*
+origianl version of a_expr, for infor
+ a_expr: c_expr
+        //::	left	PostgreSQL-style typecast
+       | a_expr TYPECAST typename -- 1
+       | a_expr COLLATE any_name -- 2
+       | a_expr AT TIME ZONE a_expr-- 3
+       //right	unary plus, unary minus
+       | (PLUS| MINUS) a_expr -- 4
+        //left	exponentiation
+       | a_expr CARET a_expr -- 5
+        //left	multiplication, division, modulo
+       | a_expr (STAR | SLASH | PERCENT) a_expr -- 6
+        //left	addition, subtraction
+       | a_expr (PLUS | MINUS) a_expr -- 7
+        //left	all other native and user-defined operators
+       | a_expr qual_op a_expr -- 8
+       | qual_op a_expr -- 9
+        //range containment, set membership, string matching BETWEEN IN LIKE ILIKE SIMILAR
+       | a_expr NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr opt_escape -- 10
+        //< > = <= >= <>	 	comparison operators
+       | a_expr (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr -- 11
+       //IS ISNULL NOTNULL	 	IS TRUE, IS FALSE, IS NULL, IS DISTINCT FROM, etc
+       | a_expr IS NOT?
+            (
+                NULL_P
+                |TRUE_P
+                |FALSE_P
+                |UNKNOWN
+                |DISTINCT FROM a_expr
+                |OF OPEN_PAREN type_list CLOSE_PAREN
+                |DOCUMENT_P
+                |unicode_normal_form? NORMALIZED
+            ) -- 12
+
+       | a_expr (ISNULL|NOTNULL) -- 13
+       | row OVERLAPS row -- 14
+
+       //NOT	right	logical negation
+       | NOT a_expr -- 15
+
+        //AND	left	logical conjunction
+       | a_expr AND a_expr -- 16
+
+        //OR	left	logical disjunction
+       | a_expr OR a_expr -- 17
+
+       | a_expr (LESS_LESS|GREATER_GREATER) a_expr -- 18
+
+       | a_expr qual_op -- 19
+       | a_expr NOT? IN_P in_expr -- 20
+       | a_expr subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr CLOSE_PAREN) -- 21
+       | UNIQUE select_with_parens -- 22
+       | DEFAULT -- 23
+;
+*/
+
 a_expr:
     a_expr_qual
 ;
@@ -2711,7 +2771,7 @@ a_expr:
 /*11*/a_expr_compare: a_expr_like ( (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr_like
         |(subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr CLOSE_PAREN)) /*21*/
         )?;
-/*10*/a_expr_like: a_expr_qual_op ( NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr_qual_op )?;
+/*10*/a_expr_like: a_expr_qual_op ( NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr_qual_op opt_escape)?;
 /* 8*/a_expr_qual_op: a_expr_unary_qualop (qual_op a_expr_unary_qualop)*;
 /* 9*/a_expr_unary_qualop: qual_op? a_expr_add;
 /* 7*/a_expr_add: a_expr_mul ( ( MINUS | PLUS  ) a_expr_mul )*;
@@ -2722,62 +2782,6 @@ a_expr:
 /* 2*/a_expr_collate:a_expr_typecast (COLLATE any_name)?;
 /* 1*/a_expr_typecast:c_expr (TYPECAST typename)*;
 
-
-//precendence accroding to Table 4.2. Operator Precedence (highest to lowest)
-//https://www.postgresql.org/docs/12/sql-syntax-lexical.html#SQL-PRECEDENCE
- a_expr1: c_expr
-        //::	left	PostgreSQL-style typecast
-       | a_expr TYPECAST typename /* 1*/
-       | a_expr COLLATE any_name /* 2*/
-       | a_expr AT TIME ZONE a_expr/* 3*/
-       //right	unary plus, unary minus
-       | (PLUS| MINUS) a_expr/* 4*/
-        //left	exponentiation
-       | a_expr CARET a_expr/* 5*/
-        //left	multiplication, division, modulo
-       | a_expr (STAR | SLASH | PERCENT) a_expr/* 6*/
-        //left	addition, subtraction
-       | a_expr (PLUS | MINUS) a_expr/* 7*/
-        //left	all other native and user-defined operators
-       | a_expr qual_op a_expr/* 8*/
-       | qual_op a_expr/* 9*/
-        //range containment, set membership, string matching BETWEEN IN LIKE ILIKE SIMILAR
-       | a_expr NOT? (LIKE|ILIKE|SIMILAR TO|(BETWEEN SYMMETRIC?)) a_expr opt_escape/* 10*/
-        //< > = <= >= <>	 	comparison operators
-       | a_expr (LT | GT | EQUAL | LESS_EQUALS | GREATER_EQUALS | NOT_EQUALS) a_expr/* 11*/
-       //IS ISNULL NOTNULL	 	IS TRUE, IS FALSE, IS NULL, IS DISTINCT FROM, etc
-       | a_expr IS NOT?
-            (
-                NULL_P
-                |TRUE_P
-                |FALSE_P
-                |UNKNOWN
-                |DISTINCT FROM a_expr
-                |OF OPEN_PAREN type_list CLOSE_PAREN
-                |DOCUMENT_P
-                |unicode_normal_form? NORMALIZED
-            )/* 12*/
-
-       | a_expr (ISNULL|NOTNULL)/* 13*/
-       | row OVERLAPS row/* 14*/
-
-       //NOT	right	logical negation
-       | NOT a_expr/* 15*/
-
-        //AND	left	logical conjunction
-       | a_expr AND a_expr/* 16*/
-
-        //OR	left	logical disjunction
-       | a_expr OR a_expr/* 17*/
-
-       | a_expr (LESS_LESS|GREATER_GREATER) a_expr/* 18*/
-
-       | a_expr qual_op/* 19*/
-       | a_expr NOT? IN_P in_expr/* 20*/
-       | a_expr subquery_Op sub_type (select_with_parens|OPEN_PAREN a_expr CLOSE_PAREN)/* 21*/
-       | UNIQUE select_with_parens/* 22*/
-       | DEFAULT/* 23*/
-;
 
  b_expr: c_expr
        | b_expr TYPECAST typename
